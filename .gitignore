@@ -1,3 +1,9 @@
+# dot files
+/.*
+
+# binary
+page-info-test
+
 # Prerequisites
 *.d
 
