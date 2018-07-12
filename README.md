@@ -2,7 +2,7 @@
 
 Some utility code to return information about the memory pages backing a given region. For example, you can answer questions like:
 
- - How many of these pages are phyiscally present in RAM?
+ - How many of these pages are physically present in RAM?
  - What fraction of this allocation is backed by huge pages?
  - Have any pages in this range been swapped out to the swapfile?
 
@@ -10,7 +10,7 @@ Basically this parses the `/proc/$PID/pagemap` file for the current process, whi
 
 ## Permissions
 
-Unfortunately (from the perspective of this utility), most of the juicy infomation about backing pages lives in the `/proc/kpagemap` file, which is only accessible as root. You can use this utility as a regular user, but only a handful of flags that are encoded directly in `/proc/pagemap` are available. They are those directly named in the `page_info` structure in `page-info.h`:
+Unfortunately (from the perspective of those wanting to use this library to its maximum capability), most of the juicy infomation about backing pages lives in the `/proc/kpagemap` file and this file is only accessible as root. You can still use this utility as a regular user, but only a handful of flags that are encoded directly in `/proc/pagemap` are available. They are those directly named in the `page_info` structure in `page-info.h`:
 
 ```
     /* soft-dirty set */
