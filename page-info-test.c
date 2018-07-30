@@ -29,13 +29,14 @@ typedef struct {
 
 #define ADVICE(flag) { #flag, flag }
 
+const advice_s advices[] = { ADVICE(MADV_HUGEPAGE), ADVICE(MADV_NORMAL), ADVICE(MADV_NOHUGEPAGE), {} };
+
 void do_full_table() {
     int psize = getpagesize();
 
     printf("%44s", "");
     fprint_info_header(stdout);
 
-    const advice_s advices[] = { ADVICE(MADV_HUGEPAGE), ADVICE(MADV_NORMAL), ADVICE(MADV_NOHUGEPAGE), {} };
 
     for (size_t kib = 256; kib <= 1024 * 1024; kib *=2) {
         for (const advice_s *advice = advices; advice->name; advice++) {
@@ -86,15 +87,12 @@ void do_one_flag_ratio(char const * name) {
 
         flag_count count;
         count = get_flag_count(get_info_for_range(b, b + size), flag);
-        printf("%7.2f MiB BEFORE %10s %7zu %7zu %7zu\n", (double)kib / 1024, name,
+        printf("%7.2f MiB BEFORE %10s %"W"zu %"W"zu %"W"zu\n", (double)kib / 1024, name,
                 count.pages_set, count.pages_available - count.pages_set, count.pages_total - count.pages_available);
         memset(b, 0x42, size);
         count = get_flag_count(get_info_for_range(b, b + size), flag);
-        printf("%7.2f MiB AFTER  %10s %7zu %7zu %7zu\n", (double)kib / 1024, name,
+        printf("%7.2f MiB AFTER  %10s %"W"zu %"W"zu %"W"zu\n", (double)kib / 1024, name,
                 count.pages_set, count.pages_available - count.pages_set, count.pages_total - count.pages_available);
-
-
-//        printf()
     }
 }
 
