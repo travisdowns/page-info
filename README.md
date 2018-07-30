@@ -27,7 +27,7 @@ Unfortunately (from the perspective of those wanting to use this library to its 
 
 So you can determine if a page is present, swapped out, its soft-dirty status, whether it is exclusive and whether it is a file mapping, but not much more. On older kernels, you can also get the _physical frame number_ (the `pfn`) field, which is essentially the physical address of the page (shifted right by 12).
 
-You probably aren't running anything important as soon, but you probably shouldn't be running this tool in anything important either: it is not production quality.
+So if you want the full info about a mapped region, you have to run this as root.
 
 ## Building
 
