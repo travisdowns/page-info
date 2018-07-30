@@ -1,4 +1,4 @@
-CPPFLAGS=-g -Os -Wall
+CPPFLAGS=-g -Os -Wall -Wextra
 
 BINARIES := page-info-test
 

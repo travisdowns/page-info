@@ -180,7 +180,7 @@ void fprint_ratios_noheader(FILE *file, page_info_array infos) {
     PAGEMAP_X(DECLARE_ACCUM);
     size_t total_kpage_ok = 0;
     size_t flag_totals[kpageflag_count] = {};
-    for (int p = 0; p < infos.num_pages; p++) {
+    for (size_t p = 0; p < infos.num_pages; p++) {
         page_info *info = &infos.info[p];
         PAGEMAP_X(INCR_ACCUM);
         if (info->kpageflags_ok) {
@@ -220,7 +220,7 @@ void fprint_ratios(FILE *file, page_info_array infos) {
 void fprint_table(FILE *f, page_info_array infos) {
     fprintf(f, "%zu total pages\n", infos.num_pages);
     fprint_info_header(f);
-    for (int p = 0; p < infos.num_pages; p++) {
+    for (size_t p = 0; p < infos.num_pages; p++) {
         fprint_info_row(f, infos.info[p]);
     }
 }
