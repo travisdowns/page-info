@@ -26,7 +26,12 @@ As a simple example, here's a snippet which prints to stdout the percentage of p
         printf("Couldn't determine hugepage info (you are probably not running as root)\n");
     }
 
-A slightly more fleshed out version of example is available as a standalone program as [malloc-demo](malloc-demo.c).
+A slightly more fleshed out version of example is available as a standalone program as [malloc-demo](malloc-demo.c). On my system it reports (this depends heavily on the value in `/sys/kernel/mm/transparent_hugepage/enabled`):
+
+```
+Allocating an array of size 7168 KiB using malloc
+Source pages allocated with transparent hugepages: 85.7% (1793 total pages, 100.0% flagged)
+```
 
 ## Permissions
 
