@@ -3,6 +3,7 @@
 
 # binary
 page-info-test
+malloc-demo
 
 # Prerequisites
 *.d

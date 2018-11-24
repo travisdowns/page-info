@@ -50,7 +50,7 @@ typedef struct {
 
     /* the total number of pages examined, which may be greater than pages_available if
      * the flag value could not be obtained for some pages (usually because the pfn is not available
-     * since the page is not yet present or because running as non-root, or
+     * since the page is not yet present or because running as non-root.
      */
     size_t pages_total;
 
@@ -64,7 +64,8 @@ typedef struct {
  * effectively giving you a ratio, so you can say "80% of the pages for this allocation are backed by
  * huge pages" or whatever.
  *
- * The flags *must* come from kpageflags (not /proc/pid/pagemane) and are delcared in linux/kernel-page-flags.h.
+ * The flags *must* come from kpageflags (these are not the same as those in /proc/pid/pagemap) and
+ * are declared in linux/kernel-page-flags.h.
  *
  * Ideally, the flag information is available for all the pages in the range, so you can
  * say something about the entire range, but this is often not the case because (a) flags
