@@ -10,6 +10,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     /* page frame number: if present, the physical frame for the page */
     uint64_t pfn;
@@ -141,5 +145,8 @@ page_info_array get_info_for_range(void *start, void *end);
  */
 void free_info_array(page_info_array infos);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PAGE_INFO_H_ */
