@@ -4,8 +4,10 @@ BINARIES := page-info-test malloc-demo
 
 all: $(BINARIES)
 
-page-info-test : page-info.o
-malloc-demo : page-info.o
+page-info.o : page-info.h
+
+$(BINARIES) : % : %.o page-info.o page-info.h
+	$(CC) $(CFLAGS) -o $@ $< page-info.o
 
 clean:
 	rm -rf *.o
