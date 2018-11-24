@@ -8,6 +8,26 @@ Some utility code to return information about the memory pages backing a given r
 
 Basically this parses the `/proc/$PID/pagemap` file for the current process, which returns basic information, and then if possible it looks up more interesting flags on a per-page basis in `/proc/kpagemap`. The available flags are documented [here](https://www.kernel.org/doc/Documentation/vm/pagemap.txt) and more briefly on the [proc manpage](http://man7.org/linux/man-pages/man5/proc.5.html).
 
+## Example
+
+As a simple example, here's a snippet which prints to stdout the percentage of pages that have been allocated with huge pages.
+
+    char *array = malloc(size);
+    memset(array, 1, size); // commit the pages
+
+    page_info_array pinfo = get_info_for_range(array, array + size);
+    flag_count thp_count = get_flag_count(pinfo, KPF_THP);
+    if (thp_count.pages_available) {
+    printf("Source pages allocated with transparent hugepages: %4.1f%% (%lu total pages, %4.1f%% flagged)\n",
+        100.0 * thp_count.pages_set / thp_count.pages_total,
+        thp_count.pages_total,
+        100.0 * thp_count.pages_available / thp_count.pages_total);
+    } else {
+        printf("Couldn't determine hugepage info (you are probably not running as root)\n");
+    }
+
+A slightly more fleshed out version of example is available as a standalone program as [malloc-demo](malloc-demo.c).
+
 ## Permissions
 
 Unfortunately (from the perspective of those wanting to use this library to its maximum capability), most of the juicy infomation about backing pages lives in the `/proc/kpagemap` file and this file is only accessible as root. You can still use this utility as a regular user, but only a handful of flags that are encoded directly in `/proc/pagemap` are available. They are those directly named in the `page_info` structure in `page-info.h`:
