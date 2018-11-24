@@ -1,6 +1,6 @@
 # page-info
 
-A small utility library to return information about the memory pages backing a given region. For example, you can answer questions like:
+A small utility library to return information about the memory pages backing a given region on Linux. For example, you can answer questions like:
 
  - How many of these pages are physically present in RAM?
  - What fraction of this allocation is backed by huge pages?
