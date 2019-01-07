@@ -12,11 +12,13 @@
 #include <linux/kernel-page-flags.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <err.h>
 #include <assert.h>
+#include <limits.h>
 
 
 #define PM_PFRAME_MASK         ((1ULL << 55) - 1)
@@ -61,9 +63,16 @@ const flag kpageflag_defs[] = {
         FLAG_SHOW(NOPAGE       )
         FLAG_SHOW(KSM          )
         FLAG_SHOW(THP          )
+        /* older kernels won't have these new flags, so conditionally compile in support for them */
+#ifdef KPF_BALLOON
         FLAG_SHOW(BALLOON      )
+#endif
+#ifdef KPF_ZERO_PAGE
         FLAG_SHOW(ZERO_PAGE    )
+#endif
+#ifdef KPF_IDLE
         FLAG_SHOW(IDLE         )
+#endif
 
         { -1, 0, false }  // sentinel
 };
@@ -81,6 +90,11 @@ const flag kpageflag_defs[] = {
     fn(swapped   ) \
     fn(present   )
 
+static unsigned get_page_size() {
+    long psize = sysconf(_SC_PAGESIZE);
+    assert(psize >= 1 && psize <= UINT_MAX);
+    return (unsigned)psize;
+}
 
 /* round the given pointer down to the page boundary (i.e,. return a pointer to the page it lives in) */
 static inline void *pagedown(void *p, unsigned psize) {
@@ -231,7 +245,7 @@ void fprint_table(FILE *f, page_info_array infos) {
  * Get info for a single page indicated by the given pointer (which may point anywhere in the page)
  */
 page_info get_page_info(void *p) {
-    int psize = getpagesize();
+    unsigned psize = get_page_size();
     FILE *pagemap_file = fopen("/proc/self/pagemap", "rb");
     if (!pagemap_file) err(EXIT_FAILURE, "failed to open pagemap");
 
@@ -266,7 +280,7 @@ page_info get_page_info(void *p) {
  * Get information for each page in the range from start (inclusive) to end (exclusive).
  */
 page_info_array get_info_for_range(void *start, void *end) {
-    unsigned psize = getpagesize();
+    unsigned psize = get_page_size();
     void *start_page = pagedown(start, psize);
     void *end_page   = pagedown(end - 1, psize) + psize;
     size_t page_count = start < end ? (end_page - start_page) / psize : 0;

@@ -10,5 +10,4 @@ $(BINARIES) : % : %.o page-info.o page-info.h
 	$(CC) $(CFLAGS) -o $@ $< page-info.o
 
 clean:
-	rm -rf *.o
-	rm -f $(BINARIES)
+	rm -f *.o $(BINARIES)
