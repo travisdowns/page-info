@@ -6,7 +6,7 @@ A small utility library to return information about the memory pages backing a g
  - What fraction of this allocation is backed by huge pages?
  - Have any pages in this range been swapped out to the swapfile?
 
-Basically this parses the `/proc/$PID/pagemap` file for the current process, which returns basic information, and then if possible it looks up more interesting flags on a per-page basis in `/proc/kpagemap`. The available flags are documented [here](https://www.kernel.org/doc/Documentation/vm/pagemap.txt) and more briefly on the [proc manpage](http://man7.org/linux/man-pages/man5/proc.5.html).
+Basically this parses the `/proc/$PID/pagemap` file for the current process, which returns basic information about the allocated memory regions (VMAs), and then if possible it looks up more interesting flags on a per-page basis in `/proc/kpagemap`. The available flags are documented [here](https://www.kernel.org/doc/Documentation/vm/pagemap.txt) and more briefly on the [proc manpage](http://man7.org/linux/man-pages/man5/proc.5.html).
 
 ## Example
 
