@@ -37,7 +37,7 @@ typedef struct {
  * Information for a number of virtually consecutive pages.
  */
 typedef struct {
-    /* how many pages_info are structures are in the array pointed to by info */
+    /* how many page_info structures are in the array pointed to by info */
     size_t num_pages;
 
     /* pointer to the array of page_info structures */

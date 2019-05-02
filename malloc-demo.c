@@ -25,6 +25,9 @@ int main(int argc, char **argv) {
 
     page_info_array pinfo = get_info_for_range(array, array + size);
     flag_count thp_count = get_flag_count(pinfo, KPF_THP);
+
+    free(array);
+
     if (thp_count.pages_available) {
     printf("Source pages allocated with transparent hugepages: %4.1f%% (%lu total pages, %4.1f%% flagged)\n",
         100.0 * thp_count.pages_set / thp_count.pages_total,
@@ -33,4 +36,5 @@ int main(int argc, char **argv) {
     } else {
         printf("Couldn't determine hugepage info (you are probably not running as root)\n");
     }
+    free_info_array(pinfo);
 }

@@ -22,6 +22,11 @@ static inline void *pagedown(void *p, unsigned psize) {
     return (void *)(((uintptr_t)p) & -(uintptr_t)psize);
 }
 
+int getenv_int(const char *var, int def) {
+    const char *val = getenv(var);
+    return val ? atoi(val) : def;
+}
+
 typedef struct {
     char const *name;
     int flag;
@@ -31,20 +36,27 @@ typedef struct {
 
 const advice_s advices[] = { ADVICE(MADV_HUGEPAGE), ADVICE(MADV_NORMAL), ADVICE(MADV_NOHUGEPAGE), {} };
 
+void print_for_range(void *start, void *end) {
+    page_info_array infos = get_info_for_range(start, end);
+    fprint_ratios_noheader(stdout, infos);
+    free_info_array(infos);
+}
+
 void do_full_table() {
     int psize = getpagesize();
 
     printf("%44s", "");
     fprint_info_header(stdout);
 
+    size_t max_kib = getenv_int("MAX_KIB", 1024 * 1024);
 
-    for (size_t kib = 256; kib <= 1024 * 1024; kib *=2) {
+    for (size_t kib = 256; kib <= max_kib; kib *=2) {
         for (const advice_s *advice = advices; advice->name; advice++) {
             size_t size = kib * 1024;
             char *b = malloc(size);
             if (advice->flag != MADV_NORMAL) {
                 char *ba = pagedown(b, psize);
-                if (madvise(ba, b + size - ba + psize, advice->flag)) {
+                if (madvise(ba, size, advice->flag)) {
                     err(EXIT_FAILURE, "madvise(%s) failed", advice->name);
                 }
             }
@@ -54,10 +66,10 @@ void do_full_table() {
                 err(EXIT_FAILURE, "Allocating %zu bytes failed, exiting...", size);
             }
             printf("%16s %7.2f MiB BEFORE memset: ", advice->name, (double)kib / 1024);
-            fprint_ratios_noheader(stdout, get_info_for_range(b, b + size));
+            print_for_range(b, b + size);
             memset(b, 0x42, size);
             printf("%16s %7.2f MiB AFTER  memset: ", advice->name, (double)kib / 1024);
-            fprint_ratios_noheader(stdout, get_info_for_range(b, b + size));
+            print_for_range(b, b + size);
             free(b);
         }
         printf("\n");

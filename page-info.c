@@ -245,35 +245,12 @@ void fprint_table(FILE *f, page_info_array infos) {
  * Get info for a single page indicated by the given pointer (which may point anywhere in the page)
  */
 page_info get_page_info(void *p) {
-    unsigned psize = get_page_size();
-    FILE *pagemap_file = fopen("/proc/self/pagemap", "rb");
-    if (!pagemap_file) err(EXIT_FAILURE, "failed to open pagemap");
-
-    if (fseek(pagemap_file, (uintptr_t)p / psize * sizeof(uint64_t), SEEK_SET)) err(EXIT_FAILURE, "pagemap seek failed");
-
-    uint64_t bits;
-    int readc;
-    if ((readc = fread(&bits, sizeof(bits), 1, pagemap_file)) != 1) err(EXIT_FAILURE, "unexpected fread return: %d", readc);
-
-    page_info info = extract_info(bits);
-
-    if (info.pfn) {
-        // we got a pfn, try to read /proc/kpageflags
-        FILE *kpageflags_file = fopen("/proc/kpageflags", "rb");
-        if (!kpageflags_file) {
-            warn("failed to open kpageflags");
-        } else {
-            if (fseek(kpageflags_file, info.pfn * sizeof(bits), SEEK_SET)) err(EXIT_FAILURE, "kpageflags seek failed");
-            if ((readc = fread(&bits, sizeof(bits), 1, kpageflags_file)) != 1) err(EXIT_FAILURE, "unexpected fread return: %d", readc);
-            info.kpageflags_ok = true;
-            info.kpageflags = bits;
-            fclose(kpageflags_file);
-        }
-    }
-
-    fclose(pagemap_file);
-
-    return info;
+    // just get the info array for a single page
+    page_info_array onepage = get_info_for_range(p, (char *)p + 1);
+    assert(onepage.num_pages == 1);
+    page_info ret = onepage.info[0];
+    free_info_array(onepage);
+    return ret;
 }
 
 /**
@@ -286,11 +263,63 @@ page_info_array get_info_for_range(void *start, void *end) {
     size_t page_count = start < end ? (end_page - start_page) / psize : 0;
     assert(page_count == 0 || start_page < end_page);
 
+    if (page_count == 0) {
+        return (page_info_array){ 0, NULL };
+    }
+
     page_info *infos = malloc((page_count + 1) * sizeof(page_info));
 
-    for (size_t p = 0; p < page_count; p++) {
-        infos[p] = get_page_info((char *)start + p * psize);
+    // open the pagemap file
+    FILE *pagemap_file = fopen("/proc/self/pagemap", "rb");
+    if (!pagemap_file) err(EXIT_FAILURE, "failed to open pagemap");
+
+    // seek to the first page
+    if (fseek(pagemap_file, (uintptr_t)start_page / psize * sizeof(uint64_t), SEEK_SET)) err(EXIT_FAILURE, "pagemap seek failed");
+
+    size_t bitmap_bytes = page_count * sizeof(uint64_t);
+    uint64_t* bitmap = malloc(bitmap_bytes);
+    assert(bitmap);
+    size_t readc = fread(bitmap, bitmap_bytes, 1, pagemap_file);
+    if (readc != 1) err(EXIT_FAILURE, "unexpected fread(pagemap) return: %zu", readc);
+
+    fclose(pagemap_file);
+
+    FILE *kpageflags_file = NULL;
+    enum { INIT, OPEN, FAILED  } file_state = INIT;
+
+    for (size_t page_idx = 0; page_idx < page_count; page_idx++) {
+        page_info info = extract_info(bitmap[page_idx]);
+
+        if (info.pfn) {
+            // we got a pfn, try to read /proc/kpageflags
+
+            // open file if not open
+            if (file_state == INIT) {
+                kpageflags_file = fopen("/proc/kpageflags", "rb");
+                if (!kpageflags_file) {
+                    warn("failed to open kpageflags");
+                    file_state = FAILED;
+                } else {
+                    file_state = OPEN;
+                }
+            }
+
+            if (file_state == OPEN) {
+                uint64_t bits;
+                if (fseek(kpageflags_file, info.pfn * sizeof(bits), SEEK_SET)) err(EXIT_FAILURE, "kpageflags seek failed");
+                if ((readc = fread(&bits, sizeof(bits), 1, kpageflags_file)) != 1) err(EXIT_FAILURE, "unexpected fread(kpageflags) return: %zu", readc);
+                info.kpageflags_ok = true;
+                info.kpageflags = bits;
+            }
+        }
+
+        infos[page_idx] = info;
     }
+
+    if (kpageflags_file)
+        fclose(kpageflags_file);
+
+    free(bitmap);
 
     return (page_info_array){ page_count, infos };
 }
