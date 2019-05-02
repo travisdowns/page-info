@@ -13,21 +13,23 @@ Basically this parses the `/proc/$PID/pagemap` file for the current process, whi
 
 As a simple example, here's a snippet which prints to stdout the percentage of pages that have been allocated with huge pages.
 
-    char *array = malloc(size);
-    memset(array, 1, size); // commit the pages
+```
+char *array = malloc(size);
+memset(array, 1, size); // commit the pages
 
-    page_info_array pinfo = get_info_for_range(array, array + size);
-    flag_count thp_count = get_flag_count(pinfo, KPF_THP);
-    if (thp_count.pages_available) {
+page_info_array pinfo = get_info_for_range(array, array + size);
+flag_count thp_count = get_flag_count(pinfo, KPF_THP);
+if (thp_count.pages_available) {
     printf("Source pages allocated with transparent hugepages: %4.1f%% (%lu total pages, %4.1f%% flagged)\n",
-        100.0 * thp_count.pages_set / thp_count.pages_total,
-        thp_count.pages_total,
-        100.0 * thp_count.pages_available / thp_count.pages_total);
-    } else {
-        printf("Couldn't determine hugepage info (you are probably not running as root)\n");
-    }
+            100.0 * thp_count.pages_set / thp_count.pages_total,
+            thp_count.pages_total,
+            100.0 * thp_count.pages_available / thp_count.pages_total);
+} else {
+    printf("Couldn't determine hugepage info (you are probably not running as root)\n");
+}
+```
 
-A slightly more fleshed out version of example is available as a standalone program as [malloc-demo](malloc-demo.c). On my system it reports (this depends heavily on the value in `/sys/kernel/mm/transparent_hugepage/enabled`):
+A slightly more complete version of this example is available as a standalone program as [malloc-demo](malloc-demo.c). On my system it reports (this depends heavily on the value in `/sys/kernel/mm/transparent_hugepage/enabled`):
 
 ```
 Allocating an array of size 7168 KiB using malloc
