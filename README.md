@@ -1,6 +1,6 @@
 # page-info
 
-A small utility allowing programatic access to information about the memory pages backing a given region of memory on Linux. For example, with page-info you can answer questions like:
+A small utility allowing programmatic access to information about the memory pages backing a given region of memory on Linux. For example, with page-info you can answer questions like:
 
  - How many of the pages associated with memory I just got from `malloc` are physically present in RAM?
  - How much more information can I put on the stack before sufferring a page fault?
