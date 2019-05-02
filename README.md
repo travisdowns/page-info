@@ -1,8 +1,9 @@
 # page-info
 
-A small utility library to return information about the memory pages backing a given region on Linux. For example, you can answer questions like:
+A small utility allowing programatic access to information about the memory pages backing a given region of memory on Linux. For example, with page-info you can answer questions like:
 
- - How many of these pages are physically present in RAM?
+ - How many of the pages associated with memory I just got from `malloc` are physically present in RAM?
+ - How much more information can I put on the stack before sufferring a page fault?
  - What fraction of this allocation is backed by huge pages?
  - Have any pages in this range been swapped out to the swapfile?
 
