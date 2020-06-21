@@ -267,7 +267,7 @@ page_info_array get_info_for_range(void *start, void *end) {
         return (page_info_array){ 0, NULL };
     }
 
-    page_info *infos = malloc((page_count + 1) * sizeof(page_info));
+    page_info *infos = malloc(page_count * sizeof(page_info));
 
     // open the pagemap file
     FILE *pagemap_file = fopen("/proc/self/pagemap", "rb");
