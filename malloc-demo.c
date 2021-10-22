@@ -1,5 +1,5 @@
 #include "page-info.h"
-#include "linux/kernel-page-flags.h"
+#include <linux/kernel-page-flags.h>
 
 #include <stdio.h>
 #include <err.h>
